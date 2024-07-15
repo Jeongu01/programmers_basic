@@ -1,5 +1,10 @@
 package Lv2;
 
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+
 public class OilDrilling {
 
   public static void main(String[] args) {
@@ -40,38 +45,44 @@ public class OilDrilling {
 
   }
 
+  Map<Integer, Integer> map = new HashMap<>();
+  int count = 2;
+
   public int solution(int[][] land) {
     int answer = 0;
-    boolean[][] isVisited = new boolean[land.length][land[0].length];
+    count = 2;
+    map.clear();
 
     for (int row = 0; row < land.length; row++) {
       for (int col = 0; col < land[0].length; col++) {
-        if (!isVisited[row][col] && land[row][col] != 0) {
-          int value = checkAround(land, isVisited, row, col);
-          if (value != 0) {
-            saveAmount(land, isVisited, value);
-          }
+        if (land[row][col] == 1) {
+          int value = checkAround(land, row, col);
+          map.put(count, value);
+          count++;
         }
       }
     }
 
-    for (int row = 0; row < land.length; row++) {
-      for (int col = 0; col < land[0].length; col++) {
-        System.out.print(land[row][col] + " ");
-      }
-      System.out.println();
-    }
+//    for (int row = 0; row < land.length; row++) {
+//      for (int col = 0; col < land[0].length; col++) {
+//        System.out.print(land[row][col] + " ");
+//      }
+//      System.out.println();
+//    }
+
+//    for (Integer integer : map.keySet()) {
+//      System.out.print("Key : " + integer + ", Value : " + map.get(integer) + " ");
+//    }
+//    System.out.println();
 
     for (int col = 0; col < land[0].length; col++) {
       int sum = 0;
-      boolean same = false;
+      Set<Integer> set = new HashSet<>();
       for (int row = 0; row < land.length; row++) {
-        if (land[row][col] == 0) {
-          same = false;
-        } else if (!same) {
-          sum += land[row][col];
-          same = true;
-        }
+        set.add(land[row][col]);
+      }
+      for (Integer integer : set) {
+        sum += map.getOrDefault(integer, 0);
       }
       answer = Math.max(answer, sum);
     }
@@ -79,36 +90,22 @@ public class OilDrilling {
     return answer;
   }
 
-  public int checkAround(int[][] land, boolean[][] isVisited, int row, int col) {
+  public int checkAround(int[][] land, int row, int col) {
     if (row < 0 || col < 0) {
       return 0; // 배열 범위 확인
     } else if (row >= land.length || col >= land[0].length) {
       return 0;
-    } else if (isVisited[row][col]) {
-      return 0;  // 방문한 곳인지 확인
-    } else if (land[row][col] == 0) {
-      return 0;   // 석유가 없으면 0 반환
-    } else if (land[row][col] == 1) {    // 석유가 있으면
-      isVisited[row][col] = true;
-      return checkAround(land, isVisited, row - 1, col) +
-          checkAround(land, isVisited, row, col - 1) +
-          checkAround(land, isVisited, row + 1, col) +
-          checkAround(land, isVisited, row, col + 1) +
-          land[row][col];
-    }
-    return 0;
-  }
-
-  public void saveAmount(int[][] land, boolean[][] isVisited, int value) {
-    for (int row = 0; row < land.length; row++) {
-      for (int col = 0; col < land[0].length; col++) {
-        if (isVisited[row][col]) {
-          land[row][col] = value;
-          isVisited[row][col] = false;
-        }
-      }
+    } else if (land[row][col] != 1) {
+      return 0;   // 방문한 곳이거나 석유가 없으면 0 반환
+    } else {    // 방문하지 않은 석유가 있으면
+      int value = land[row][col];
+      land[row][col] = count;
+      return checkAround(land, row - 1, col) +
+          checkAround(land, row, col - 1) +
+          checkAround(land, row + 1, col) +
+          checkAround(land, row, col + 1) +
+          value;
     }
   }
-
 
 }
